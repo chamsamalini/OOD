@@ -1,0 +1,37 @@
+name: SDD Benefits Web App
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'sdd-benefits-webapp/**'
+      - '.github/workflows/sdd-benefits-webapp.yml'
+  pull_request:
+    paths:
+      - 'sdd-benefits-webapp/**'
+      - '.github/workflows/sdd-benefits-webapp.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build WAR
+        run: mvn -B -f sdd-benefits-webapp/pom.xml clean package
+
+      - name: Upload WAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdd-benefits-webapp-war
+          path: sdd-benefits-webapp/target/*.war

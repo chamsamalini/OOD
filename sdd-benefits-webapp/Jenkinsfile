@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Verify Tools') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'java -version'
+                        sh 'mvn -version'
+                    } else {
+                        bat 'java -version'
+                        bat 'mvn -version'
+                    }
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'mvn clean package'
+                    } else {
+                        bat 'mvn clean package'
+                    }
+                }
+            }
+        }
+
+        stage('Archive') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.war', fingerprint: true
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build completed successfully.'
+        }
+        failure {
+            echo 'Build failed. Review the console output.'
+        }
+        always {
+            echo 'Pipeline finished.'
+        }
+    }
+}
